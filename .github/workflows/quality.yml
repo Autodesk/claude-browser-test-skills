@@ -1,0 +1,36 @@
+name: Quality gates
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Manifests, skill frontmatter, internal-reference guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Validate plugin/marketplace manifests
+        run: node scripts/ci/check-manifests.mjs
+      - name: Check SKILL.md frontmatter
+        run: bash scripts/ci/check-skill-frontmatter.sh
+      - name: Guard against internal references
+        run: bash scripts/ci/check-internal-refs.sh
+
+  markdown-lint:
+    name: Markdown lint (non-blocking until baselined)
+    runs-on: ubuntu-latest
+    # TODO: flip to blocking once existing findings in skills/ and docs/ are
+    # baselined or fixed (tracking issue #1).
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: markdownlint
+        run: npx --yes markdownlint-cli2 "**/*.md" "#node_modules"

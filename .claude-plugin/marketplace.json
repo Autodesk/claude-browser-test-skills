@@ -1,0 +1,20 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "browser-test-skills",
+  "description": "Marketplace for the browser-test E2E skill pipeline for Claude Code",
+  "owner": {
+    "name": "Autodesk, Inc."
+  },
+  "plugins": [
+    {
+      "name": "browser-test",
+      "description": "E2E browser test pipeline for Claude Code: author, refine, compile, and run Playwright tests using browser automation",
+      "version": "1.0.0",
+      "author": {
+        "name": "Brian Dueck"
+      },
+      "source": "./",
+      "category": "testing"
+    }
+  ]
+}
