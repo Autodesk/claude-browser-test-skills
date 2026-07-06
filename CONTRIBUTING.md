@@ -40,7 +40,7 @@ Run the same gates CI runs on every pull request, from the repo root:
 node scripts/ci/check-manifests.mjs          # manifests parse + required fields
 bash scripts/ci/check-skill-frontmatter.sh   # SKILL.md frontmatter is valid
 bash scripts/ci/check-internal-refs.sh        # no internal/enterprise references
-npx markdownlint-cli2 "**/*.md" "#node_modules"   # markdown lint (advisory)
+npx markdownlint-cli2 "**/*.md" "#node_modules" "#CODE_OF_CONDUCT.md"   # markdown lint
 ```
 
 And validate the plugin itself:
@@ -51,7 +51,7 @@ claude plugin validate .
 
 ### How CI works
 
-Every pull request runs the **Quality gates** GitHub Actions workflow (`.github/workflows/quality.yml`): a blocking job that validates the manifests, checks SKILL.md frontmatter, and runs the internal-reference guard, plus an advisory markdown-lint job. PRs must be green before merge.
+Every pull request runs the **Quality gates** GitHub Actions workflow (`.github/workflows/quality.yml`): a job that validates the manifests, checks SKILL.md frontmatter, and runs the internal-reference guard, plus a markdown-lint job. All jobs must pass before merge.
 
 ## Conventions
 

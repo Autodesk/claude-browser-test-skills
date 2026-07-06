@@ -1,9 +1,12 @@
 {
-  // Lenient config — these docs are prose- and example-heavy.
+  // markdownlint default ruleset + documented exceptions conventional for
+  // prose- and example-heavy technical docs. Everything else stays at default
+  // and is enforced (run `markdownlint-cli2 --fix` to auto-normalize).
   "default": true,
-  "MD013": false, // line length
-  "MD033": false, // inline HTML (SKILL.md uses HTML comments / diagrams)
-  "MD041": false, // first line need not be a heading (YAML frontmatter)
+  "MD013": false, // line length — prose and tables run long
+  "MD033": false, // inline HTML — SKILL.md uses HTML comments / dot diagrams
+  "MD041": false, // first line need not be a heading — YAML frontmatter
+  "MD060": false, // table-pipe alignment — cosmetic, not enforced
   "MD024": { "siblings_only": true }, // repeated headings ok across sections
   "MD029": false, // ordered-list numbering style
   "MD046": false, // code block style (indented vs fenced both appear)

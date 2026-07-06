@@ -18,6 +18,7 @@ Takes a structured test case and makes it deterministic by running it repeatedly
 - User says "stabilize this test" or "make this test reliable"
 
 **Do NOT use when:**
+
 - No structured test case exists yet (use `browser-test:author` first)
 - A stable test just needs to be executed (use `browser-test:runner`)
 
@@ -44,6 +45,7 @@ digraph refiner_flow {
 ```
 
 ### 1. Read the test case and conventions
+
 Read the test case file, global conventions, and area conventions. Understand every step before running.
 
 Check the test's **Environments** line against `E2E_ENVIRONMENT` (default: `local`). If the current environment is not listed, refuse to execute. Use `E2E_BASE_URL` (default: `http://localhost:5173`) wherever the test references it.
@@ -51,18 +53,23 @@ Check the test's **Environments** line against `E2E_ENVIRONMENT` (default: `loca
 **Validate the three-hook structure .** The test case MUST contain three top-level sections: `## Before Hook`, `## Test Steps`, `## After Hook`. If any section is missing, stop and report — this is a hand-off bug from the author skill, not a refinement issue. Empty sections are allowed only when the markdown uses the explicit `_None — {reason}._` placeholder body. Fixing missing sections is an author-skill responsibility, not a refiner-skill responsibility.
 
 ### 2. Execute with fresh session
+
 Follow the Session Management procedure from global conventions:
+
 1. Close any existing browser session (`browser_close`)
 2. Navigate to `E2E_BASE_URL` - this starts a fresh browser instance
 3. Verify clean session (cookie consent banner should appear on first navigation)
 
 ### 3. Execute the test
+
 Follow the test case steps in hook order: `## Before Hook` → `## Test Steps` → `## After Hook`. Do not improvise or add steps not in the document. If you must deviate, that's a signal the test case needs updating.
 
 **After Hook is mandatory and runs even if Test Steps fails.** Treat the execution as a try/finally: if any Test Step fails, capture the failure evidence, then still run every step in `## After Hook` so the next refinement run starts from a clean state. Record any After Hook failures separately (a teardown failure does not mask a test step failure).
 
 ### 4. On failure: analyze and update
+
 When a step fails:
+
 1. **Screenshot** the current state
 2. **Note which hook failed** — Before Hook, Test Steps, or After Hook. Failures in different hooks have different fix patterns:
    - **Before Hook failure** → setup is non-deterministic or convention drift. Fix the setup step or the referenced convention.
@@ -78,10 +85,13 @@ When a step fails:
 6. **Reset the consecutive pass counter** to 0
 
 ### 5. On pass: increment counter
+
 When the test passes, increment the consecutive pass counter. Continue running until reaching N consecutive passes (default: 5).
 
 ### 6. Report results
+
 When done, report:
+
 - Total runs attempted
 - Files modified (test case and/or conventions)
 - Patterns discovered and where they were documented

@@ -25,12 +25,9 @@ jobs:
         run: bash scripts/ci/check-internal-refs.sh
 
   markdown-lint:
-    name: Markdown lint (non-blocking until baselined)
+    name: Markdown lint
     runs-on: ubuntu-latest
-    # TODO: flip to blocking once existing findings in skills/ and docs/ are
-    # baselined or fixed (tracking issue #1).
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - name: markdownlint
-        run: npx --yes markdownlint-cli2 "**/*.md" "#node_modules"
+        run: npx --yes markdownlint-cli2 "**/*.md" "#node_modules" "#CODE_OF_CONDUCT.md"

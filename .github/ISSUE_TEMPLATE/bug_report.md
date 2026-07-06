@@ -15,10 +15,12 @@ A clear description of the problem.
 What you expected instead.
 
 **Steps to reproduce**
+
 1. …
 2. …
 
 **Environment**
+
 - Claude Code version:
 - Model used (e.g. claude-opus-4-8):
 - Playwright MCP version:

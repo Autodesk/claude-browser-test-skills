@@ -17,9 +17,11 @@
 ### Task 1: Update Step 1 Item 4 — Inventory Loading
 
 **Files:**
+
 - Modify: `skills/compiler/SKILL.md:41` (Step 1 item 4)
 
 The current item 4 reads:
+
 ```
 4. All files in `playwright-tests/utils/` (utility inventory)
 ```
@@ -33,11 +35,13 @@ Verify line 41 contains item 4 as expected.
 - [ ] **Step 1.2: Replace Step 1 item 4**
 
 Old:
+
 ```markdown
 4. All files in `playwright-tests/utils/` (utility inventory)
 ```
 
 New:
+
 ```markdown
 4. `playwright-tests/utils/INVENTORY.md` and `playwright-tests/journeys/{area}/INVENTORY.md` (utility inventories — run bootstrapping if global inventory absent; run staleness check against referenced `.ts` files before proceeding)
 ```
@@ -51,6 +55,7 @@ Read lines 35-50 to confirm structure is intact.
 ### Task 2: Add Bootstrapping Subsection to Step 1
 
 **Files:**
+
 - Modify: `skills/compiler/SKILL.md` (after Step 1 item list, before Step 2)
 
 - [ ] **Step 2.1: Add bootstrapping flow after the item list**
@@ -84,16 +89,19 @@ Read the section to confirm it appears between Step 1 and Step 2.
 ### Task 3: Update Step 3 Convention-Shorthand Reference
 
 **Files:**
+
 - Modify: `skills/compiler/SKILL.md:82` (Step 3 critical constraints)
 
 - [ ] **Step 3.1: Find and update the convention-shorthand sentence**
 
 Current text (line 82):
+
 ```markdown
 - If a step references a convention shorthand (e.g., "Complete Auth0 login"), check the Utility Mapping Table before expanding inline
 ```
 
 New text:
+
 ```markdown
 - If a step references a convention shorthand (e.g., "Complete Auth0 login"), check the loaded utility inventories before expanding inline
 ```
@@ -119,6 +127,7 @@ Implements spec sections: Bootstrapping, Compiler Skill Changes Step 1"
 ### Task 4: Replace Step 4 with Inventory Lookup and Extraction Triggers
 
 **Files:**
+
 - Modify: `skills/compiler/SKILL.md:84-89` (Step 4)
 
 - [ ] **Step 4.1: Read current Step 4 content**
@@ -174,6 +183,7 @@ Implements spec section: Compiler Skill Changes Step 4"
 ### Task 5: Insert Step 5.5 Between Assembly and Verify
 
 **Files:**
+
 - Modify: `skills/compiler/SKILL.md` (after Step 5, before Step 6)
 
 - [ ] **Step 5.1: Locate insertion point**
@@ -190,6 +200,7 @@ Insert before Step 6:
 Before running verification, present all extraction candidates to the user:
 
 ```
+
 UTILITY EXTRACTION PROPOSALS
 
 1. completeCheckout(page, firstName, lastName, zip)  [COMPLEXITY + REPETITION]
@@ -204,6 +215,7 @@ UTILITY EXTRACTION PROPOSALS
    }
 
    Approve? [yes / no / edit]
+
 ```
 
 **Response handling:**
@@ -252,6 +264,7 @@ Implements spec section: Compiler Skill Changes Step 5.5"
 ### Task 6: Add Inventory Write Protocol to Step 6
 
 **Files:**
+
 - Modify: `skills/compiler/SKILL.md` (Step 6 Verify section)
 
 - [ ] **Step 6.1: Read current Step 6 content**
@@ -281,6 +294,7 @@ If an area-level `INVENTORY.md` does not yet exist and an area-scoped utility wa
 ### Task 7: Update Step 7 Report Format
 
 **Files:**
+
 - Modify: `skills/compiler/SKILL.md` (Step 7 Report section)
 
 - [ ] **Step 7.1: Read current Step 7 success report format**
@@ -292,6 +306,7 @@ Identify the "Suggested new utilities:" block to replace.
 Remove the `Suggested new utilities:` block and replace the relevant portion with:
 
 Old block (remove entirely):
+
 ```
 Suggested new utilities:
   - {functionName}({params}): {returnType}
@@ -301,6 +316,7 @@ Suggested new utilities:
 ```
 
 New blocks (add conditionally — omit when empty):
+
 ```
 Utility extractions approved:
   - {functionName}() → written to {file}
@@ -330,16 +346,19 @@ Implements spec sections: Inventory Write Protocol, Success Report Changes"
 ### Task 8: Update Rule 9
 
 **Files:**
+
 - Modify: `skills/compiler/SKILL.md:269` (Rule 9)
 
 - [ ] **Step 8.1: Find and update Rule 9**
 
 Current text:
+
 ```markdown
 9. **Use existing utilities.** Check the Utility Mapping Table before emitting inline code. Do not duplicate existing utilities.
 ```
 
 New text:
+
 ```markdown
 9. **Use existing utilities.** Check loaded utility inventories before emitting inline code. Do not duplicate existing utilities.
 ```
@@ -349,11 +368,13 @@ New text:
 ### Task 9: Update Utility Mapping Table Section
 
 **Files:**
+
 - Modify: `skills/compiler/SKILL.md:241-244` (Utility Mapping Table section)
 
 - [ ] **Step 9.1: Replace Utility Mapping Table section**
 
 Current section (empty placeholder):
+
 ```markdown
 ## Utility Mapping Table
 
@@ -361,6 +382,7 @@ Check recorded sequences against known playwright utilities in the repo before e
 ```
 
 New section:
+
 ```markdown
 ## Utility Inventory Format
 
@@ -379,6 +401,7 @@ The compiler reads `INVENTORY.md` files from the target project repo. Format:
 ```
 
 Signatures use simplified format for readability (type annotations omitted in display). Declined extraction records are appended as HTML comments — matching on future runs is by **function name + target file path**.
+
 ```
 
 - [ ] **Step 9.2: Commit chunk 5**
@@ -400,6 +423,7 @@ Implements spec section: Inventory File Format"
 ### Task 10: Update README Project Setup Section
 
 **Files:**
+
 - Modify: `README.md:170-185` (Project Setup section)
 
 - [ ] **Step 10.1: Read current Project Setup structure**
@@ -409,6 +433,7 @@ Verify the file tree location.
 - [ ] **Step 10.2: Add INVENTORY.md to the file tree**
 
 Update the file tree to include:
+
 ```
 └── playwright-tests/
     ├── playwright.config.ts
@@ -461,6 +486,7 @@ Verify all sections are present and correctly formatted.
 - [ ] **Step 11.2: Cross-check against spec**
 
 Verify each spec requirement is addressed:
+
 - [ ] Step 1 item 4 replacement
 - [ ] Bootstrapping flow documented
 - [ ] Staleness check documented
@@ -486,6 +512,7 @@ git commit -m "chore: final cleanup for compiler utility inventory implementatio
 - [ ] **Step 11.5: Mark spec as Implemented**
 
 Update spec status from "Approved" to "Implemented":
+
 ```bash
 # In docs/superpowers/specs/2026-03-14-compiler-utility-inventory-design.md
 # Change: **Status:** Approved

@@ -18,6 +18,7 @@ Transforms a vague user description (e.g., "test the purchase flow") into a stru
 - User says "write a test for..." or "create a test case for..."
 
 **Do NOT use when:**
+
 - A structured test case already exists (use `browser-test:runner` instead)
 - An existing test is flaky and needs stabilization (use `browser-test:refiner` instead)
 
@@ -47,6 +48,7 @@ digraph author_flow {
 **Hook-aware authoring :** Every test case the author produces MUST separate observations into three named markdown sections — `## Before Hook`, `## Test Steps`, `## After Hook`. The compiler maps these 1:1 to Playwright `test.beforeEach`, the `test()` body wrapped in `test.step()` blocks, and `registerTeardown` / `test.afterEach`. Inline setup or cleanup mixed into `## Test Steps` produces a malformed compiled spec.
 
 ### 1. Read conventions
+
 Read `tests/e2e/conventions.md` (global) to understand session management, interaction patterns, wait strategies, and verification approach.
 
 ### 1b. Resolve Jira XRay source (when a key is provided)
@@ -61,14 +63,17 @@ When the user invokes `/author` with one or more Jira issue keys:
 If no Jira key is provided, proceed from the user's feature description only and omit Jira metadata from the output file.
 
 ### 2. Classify the functional area
+
 Determine which area the test belongs to using the Functional Areas table in global conventions:
 
 ### 3. Read area conventions
+
 Read `tests/e2e/{area}/conventions.md` for area-specific flows (e.g., Authentication login sequence, persona specific workflows).
 
 **Catalog reusable procedures:** Before exploring, scan the area conventions for documented multi-step sequences (e.g., login flows, navigation patterns, dropdown interactions, admin panel access). Build a list of these — you will reference them by name in test steps rather than re-describing them. Also scan existing test cases in the area (`tests/e2e/{area}/*.md`) for repeated sub-flows that could be referenced.
 
 ### 4. Exploratory browser run
+
 Using the Playwright MCP tools, explore the target area systematically. Start with a fresh browser session (follow Session Management from global conventions).
 
 **Phase 1 — Reconnaissance:**
@@ -76,6 +81,7 @@ Navigate to the target area. Use `browser_snapshot` and `browser_take_screenshot
 
 **Phase 2 — Happy path exploration:**
 Walk through the primary intended user flow end-to-end. For each step:
+
 - Use `browser_snapshot` to inspect the accessibility tree before interacting
 - Use `browser_click` (with accessibility ref from snapshot), `browser_type`, `browser_select_option` to interact
 - Note expected behavior vs. actual behavior at each step
@@ -84,6 +90,7 @@ Walk through the primary intended user flow end-to-end. For each step:
 
 **Phase 3 — Edge case probing:**
 After the happy path, probe boundary conditions:
+
 - Empty states (no data, blank forms)
 - Invalid inputs (wrong formats, out-of-range values)
 - Rapid interactions (double-clicks, fast navigation)
@@ -92,6 +99,7 @@ After the happy path, probe boundary conditions:
 
 **Phase 4 — State transition testing:**
 Observe how the UI responds to state changes:
+
 - Loading states and spinners
 - Success/error feedback messages
 - Data persistence after navigation (back button, page refresh)
@@ -101,12 +109,15 @@ Observe how the UI responds to state changes:
 From your exploration, compile a list of distinct test-worthy scenarios. Each scenario should represent ONE verifiable user outcome (e.g., "successful purchase with single club", "error when email is invalid", "banner dismissal on return visit"). Prioritize user-critical paths over cosmetic details.
 
 ### 5. Confirm scenario scope
+
 Present the identified scenarios to the user as a numbered list with one-sentence descriptions. Wait for confirmation before authoring. The user may narrow, expand, or reprioritize the list.
 
 If only one scenario was identified (directed request like "test the login flow"), skip confirmation and proceed.
 
 ### 6. Document steps
+
 For each approved scenario, convert the relevant exploratory run observations into structured steps:
+
 - Each step has a clear action and optional verification
 - Reference convention shorthand where applicable (e.g., "Complete login")
 - Include conditional steps for elements that may or may not appear (banners, modals)
@@ -121,12 +132,14 @@ For each approved scenario, convert the relevant exploratory run observations in
 | **After Hook** (Teardown) | Idempotent cleanup that restores shared fixtures or removes resources the test created (delete project, restore row order, archive item, close extra tabs). Must be defensive — safe to run even if the test failed mid-way. | First-time creation of resources. Anything that mutates state the test depends on. Anything required for the test to start cleanly (that's Before Hook). |
 
 **Rules for hook classification:**
+
 - A step that ends with "**Verify:**" usually belongs in **Test Steps**. Verifications inside Before Hook are sanity checks for setup (e.g., "Verify the BOM tab is loaded") and should be terse.
 - Anything captured during your exploration as "I had to do X to reach the starting state" is **Before Hook**.
 - Anything captured as "I had to undo X so the next run starts clean" is **After Hook**.
 - If a step both mutates state AND is the thing under test (e.g., "Create a new project" in a project-creation test), it stays in **Test Steps**, and you add a corresponding **After Hook** step to delete it.
 
 ### 7. Write the test case file(s)
+
 For each scenario, create `tests/e2e/{area}/{test-name}.md` following this structure:
 
 ```markdown
@@ -177,12 +190,14 @@ One-sentence description of what this test validates.
 **If a section is empty for a given test, still include the heading with the body `_None — {one-line reason}._` so the compiler can confirm the section was considered (not forgotten).** Common reasons: read-only tests have no After Hook; tests using only standard area preconditions may have a minimal Before Hook referencing the convention.
 
 **DRY rules for step authoring:**
+
 - If a multi-step sequence is already documented in area conventions (login, navigation, dropdown interaction, admin access), reference it by convention section name — e.g., `Complete login (see area conventions: Authentication)`. Do NOT re-describe or inline the steps.
 - If a code pattern exists in conventions (e.g., custom widget interactions, cookie injection, tree expansion), reference the convention and only specify the **varying parameters** (which element, which index, which option). Do NOT inline code blocks that duplicate convention patterns.
 - If a sub-flow is shared with another test in the same area (e.g., "navigate to dashboard", "create a new record"), define it once in area conventions and reference it from both tests.
 - Never hardcode URLs or subdomains — use the env var defined in area conventions (e.g., `E2E_BASE_URL`, `{AREA}_BASE_URL`). Verify step text says "navigate to `{ENV_VAR}`", not "navigate to `https://specific.domain.com`".
 
 ### 8. DRY validation checkpoint
+
 Before handing off, review each authored test case against these checks:
 
 1. **No inline login steps** — login must reference the convention procedure (e.g., "Complete login — see area conventions: Authentication"), not spell out SSO / credential / cookie steps.
@@ -199,6 +214,7 @@ Before handing off, review each authored test case against these checks:
 If any check fails, fix the test case before proceeding. If a convention update is needed, make it first.
 
 ### 9. Hand off to refiner
+
 Tell the user the test case(s) are ready for refinement. List each authored file:
 
 ```

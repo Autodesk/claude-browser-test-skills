@@ -18,6 +18,7 @@ Executes a refined, stable E2E test case exactly as documented. No improvisation
 - CI-style validation of a known-good flow
 
 **Do NOT use when:**
+
 - No test case file exists (use `browser-test:author`)
 - The test is known to be flaky (use `browser-test:refiner`)
 
@@ -30,34 +31,44 @@ Executes a refined, stable E2E test case exactly as documented. No improvisation
 ## Process
 
 ### 1. Load test context
+
 Read in order:
+
 1. `tests/e2e/conventions.md` (global)
 2. `tests/e2e/{area}/conventions.md` (area)
 3. The test case file
 
 ### 2. Environment gate
+
 Read `E2E_ENVIRONMENT` from the environment (default: `local`). Check the test case's **Environments** line in preconditions. If the current environment is not listed, **refuse to execute** and report:
+
 ```
 BLOCKED: {test name}
 Reason: Test not allowed in "{environment}" (allowed: {environments list})
 ```
+
 This is a hard stop - do not proceed, do not ask if the user wants to override.
 
 ### 3. Verify preconditions
+
 Check each remaining precondition listed in the test case. If any are unmet, report and stop.
 
 Read `E2E_BASE_URL` from the environment (default: `http://localhost:5173`). Use this value wherever the test references `E2E_BASE_URL`.
 
 ### 4. Set up fresh session
+
 Follow Session Management from global conventions:
+
 1. Close any existing browser session (`browser_close`)
 2. Navigate to `E2E_BASE_URL` - this starts a fresh browser instance
 3. Verify clean session (cookie consent banner should appear on first navigation)
 
 ### 5. Execute steps
+
 Execute the three hook sections **in this order**: `## Before Hook` → `## Test Steps` → `## After Hook` . Validate the markdown has all three sections before starting — if any is missing, refuse to execute and report a malformed test case.
 
 For each step in each section:
+
 1. Perform the action exactly as described
 2. If the step references a convention (e.g., "Complete Auth0 login"), follow that convention's documented sequence
 3. If a **Verify** directive exists, confirm the condition
@@ -67,6 +78,7 @@ For each step in each section:
 ### 6. Report result
 
 **On PASS:**
+
 ```
 PASS: {test name}
 Order/Reference: {any generated ID}
@@ -76,6 +88,7 @@ After Hook:  {N}/{N}
 ```
 
 **On FAIL:**
+
 ```
 FAIL: {test name}
 Failed in: {Before Hook | Test Steps | After Hook}
@@ -100,6 +113,7 @@ URL: {current URL}
 ## Batch Execution
 
 When asked to run multiple tests:
+
 1. Run each test with its own fresh session
 2. Report results as a summary table:
 

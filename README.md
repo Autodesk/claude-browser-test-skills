@@ -19,7 +19,6 @@ Author → Refiner → Compiler → Playwright CI
 | `browser-test:runner` | Executes a stable test case exactly as written using Claude and playwright-mcp, reports pass/fail with evidence. Requires LLM to run tests. |
 | `browser-test:compiler` | Converts a stable markdown test case into a Playwright `.spec.ts` file via guided browser replay. No LLM dependency to run tests.       |
 
-
 ## Why Test Automation Matters
 
 A reliable automated test suite is one of the highest-leverage investments a software team can make. It provides confidence that new changes haven't broken existing behaviour, enables faster release cycles, and catches regressions before users do. Without it, every deployment is a manual verification exercise and every refactor carries hidden risk.
@@ -89,7 +88,7 @@ Doing this yourself first means you arrive at the authoring step with a clear me
 
 Once you've chosen a flow, describe it directly:
 
-> "Write a test that verifies a standard user can add an item to the cart and complete checkout on https://www.saucedemo.com"
+> "Write a test that verifies a standard user can add an item to the cart and complete checkout on <https://www.saucedemo.com>"
 
 **Step 3 — Run the full pipeline**
 
@@ -105,7 +104,7 @@ After one full pass on saucedemo you'll have the muscle memory for the workflow.
 
 Once you're comfortable with the pipeline, the author skill can also drive discovery. Ask it to explore the site and propose a full test plan:
 
-> "Do exploratory testing on https://www.saucedemo.com, discover what flows are present, and suggest a set of tests broken down by functional area."
+> "Do exploratory testing on <https://www.saucedemo.com>, discover what flows are present, and suggest a set of tests broken down by functional area."
 
 `browser-test:author` will navigate the site, identify distinct user flows, and return a prioritised list of test scenarios grouped by area — before writing a single test case. This is more time-intensive but surfaces coverage gaps you might not have thought to look for.
 
@@ -134,6 +133,7 @@ claude
 ```
 
 You can revert to a faster, cheaper model (e.g. `claude-sonnet-5` or `claude-haiku-4-5`) for running stable tests with `browser-test:runner`, where the task is execution rather than reasoning. But for authoring, refining, and compiling, the investment in Opus pays for itself in fewer refinement cycles and more robust generated selectors.
+
   ```json
   {
     "mcpServers": {
@@ -335,4 +335,3 @@ To report a vulnerability, please follow [SECURITY.md](SECURITY.md) — do not o
 ## License
 
 Licensed under the [Apache License 2.0](LICENSE). Copyright 2026 Autodesk, Inc. See [`NOTICE`](NOTICE) for attribution.
-

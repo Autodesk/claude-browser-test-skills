@@ -18,6 +18,7 @@ Converts a refined markdown E2E test case into a Playwright `.spec.ts` file by r
 - Batch compilation of multiple stable test cases
 
 **Do NOT use when:**
+
 - No test case file exists (use `browser-test:author`)
 - Test case hasn't been refined/stabilized (use `browser-test:refiner`)
 - Test is known to be flaky (refine first)
@@ -35,6 +36,7 @@ Converts a refined markdown E2E test case into a Playwright `.spec.ts` file by r
 ### 1. Load Context
 
 Read in order:
+
 1. `tests/e2e/conventions.md` (global conventions)
 2. `tests/e2e/{area}/conventions.md` (area conventions)
 3. The markdown test case to compile
@@ -53,6 +55,7 @@ Read in order:
    - **Import** — the import statement needed, e.g. `import { fooLocators as foo } from '../../locators/foo-locators'`
 
    Generic example of entries the table might contain after scanning `*-locators.ts` files:
+
    ```
    page.getByTestId('search-input')                  → nav.searchInput(page)
    page.getByTestId('search-input').getByRole('combobox') → nav.searchCombobox(page)
@@ -73,6 +76,7 @@ Read in order:
 8. At least one existing `.spec.ts` in `playwright-tests/journeys/` (gold standard for output structure and style)
 
 Parse from the markdown:
+
 - **Test name** from the `# heading`
 - **Jira key** from `<!-- Jira: PROJ-XXXXX -->` or the `# PROJ-XXXXX —` heading (authored by `/author`; compiler reads only — never writes)
 - **Environments** from the Preconditions section
@@ -110,6 +114,7 @@ After loading inventories, run two checks:
 **2. Reverse coverage check (ts files → inventory):** Scan all existing `.spec.ts` files in `playwright-tests/journeys/` for inline sequences that match an inventory utility. For each match found, record it as a **coverage gap** — a spec that should be using a utility but has inline code instead. Apply the exception rule below before flagging.
 
 **Coverage gap exception — do not flag when:**
+
 - The matching inline sequence constitutes the MAJORITY (>50%) of the test body — that spec is likely testing the utility behavior itself (e.g., `login-web-client.spec.ts` tests the login flow, so it should keep inline steps)
 - The spec is the one currently being compiled
 
@@ -118,16 +123,21 @@ Coverage gaps found during this check are surfaced in the report (Step 7) as a *
 ### 2. Set Up Fresh Session
 
 Follow Session Management from global conventions:
+
 1. Clear all cookies including httpOnly auth cookies:
+
    ```js
    // browser_run_code
    async (page) => { await page.context().clearCookies(); }
    ```
+
 2. Clear client-side storage:
+
    ```js
    // browser_evaluate
    () => { localStorage.clear(); sessionStorage.clear(); }
    ```
+
 3. Navigate to `E2E_BASE_URL` (or `PLAYWRIGHT_TEST_BASE_URL` — check `playwright.config.ts`)
 4. Verify clean session: cookie consent banner visible, navbar shows "Log in" (not a user avatar)
 
@@ -141,6 +151,7 @@ Walk through each markdown step in the live browser. For every interaction:
 4. **Record** wait conditions from what actually happened (URL changes, element appearances, redirect timeouts)
 
 **Critical constraints:**
+
 - Selectors come from `browser_snapshot` output ONLY — do not read Svelte components, HTML files, or application source code to find selectors
 - Translate each markdown step faithfully. Do not reorder steps, add extra verification not in the markdown, or skip steps
 - If the markdown says a field is "pre-populated", verify the value with an assertion — do not call a fill utility
@@ -149,12 +160,14 @@ Walk through each markdown step in the live browser. For every interaction:
 ### 4. Map to Existing Utilities
 
 Before emitting raw Playwright calls for a recorded sequence, check the loaded utility inventories (global and area-level). Rules:
+
 - If an exact match exists, use the utility
 - If a utility is close but not identical to the recorded sequence, emit inline code — do not force a fit
 - **Locator Lookup Table gate (hard blocking rule):** Before emitting ANY raw `page.getByRole(...)`, `page.getByTestId(...)`, `page.getByLabel(...)`, or `page.getByText(...)` call, look it up in the Locator Lookup Table built in Step 1. If a match exists → you MUST use the locator method. This is non-negotiable — emitting a raw selector when the Lookup Table has a locator method for it is a **compilation error**. Stop, use the locator, add the import. Only emit a raw selector if no entry exists in the Lookup Table for that selector pattern.
 - Track which utilities were reused and which steps required inline code (for the report)
 
 **Two utility kinds to check:**
+
 1. **Action utilities** — `async function foo(page, ...)` that perform multi-step sequences (click + fill + assert). Import and call directly.
 2. **Locator objects** — `const fooLocators = { bar: (page) => page.getByRole(...) }`. Import the object and call its methods inline (e.g. `nav.searchInput(page).fill(...)`). Use these to avoid repeating raw `getByRole` calls.
 
@@ -178,6 +191,7 @@ The proposal follows the same approval flow as Step 5.5. On approval, write the 
 | **Spec-level function** ⛔ | Any `async function` or named helper function defined **outside** `test.describe` in the spec output. This is a **hard blocker** — the compiler must NEVER write a spec-level function. If one is needed, raise it as an extraction candidate BEFORE writing the spec. If the user approves, write it to `utils/*-helpers.ts` and import it. If the user declines, inline the logic as an arrow function inside the test body only — never as a named function at file scope. |
 
 **Utility type for proposals:**
+
 - Single-selector locator → propose adding to an existing `*-locators.ts` file, or creating a new one if none fits
 - Multi-step action sequence → propose as an `async function` in `utils/*.ts` or `utils/*-helpers.ts`
 - If both apply (a helper that also wraps repeated selectors), extract the helper first; locator extraction is secondary
@@ -270,10 +284,11 @@ test.describe('{Test Name from markdown heading}', () => {
 The `tag` array comes directly from the `**Markers:**` line in the markdown Preconditions section. If no `**Markers:**` line exists, use standard defaults: `@regression @positive` (add `@smoke @sanity` for login/auth tests, `@flaky` when the YAML source has a `Flaky` tag).
 
 **Assembly rules:**
+
 - The header comment with `Compiled from:`, `Compiled at:`, and the "do not edit" warning is mandatory
 - The `testInfo.annotations.push({ type: 'source', ... })` call inside `test.beforeEach` is mandatory — enables tracing failures back to the source markdown in HTML/JSON reports
 - Environment gating via `test.skip` is mandatory — derive allowed environments from the markdown Preconditions `**Environments:**` line
-- **Three-hook emission is mandatory ** — every spec must have a `test.beforeEach` for `## Before Hook` and `test.step('Step N: ...')` blocks for `## Test Steps`. `test.afterEach` and/or `registerTeardown` calls are emitted from `## After Hook`. See Hook Emission Rules above for the placement matrix.
+- **Three-hook emission is mandatory** — every spec must have a `test.beforeEach` for `## Before Hook` and `test.step('Step N: ...')` blocks for `## Test Steps`. `test.afterEach` and/or `registerTeardown` calls are emitted from `## After Hook`. See Hook Emission Rules above for the placement matrix.
 - Each `## Test Steps` step becomes an `await test.step('Step N: {title}', async () => { ... })` block. No raw Playwright call may live directly in the `test()` body — everything goes inside a `test.step`. Setup steps inside `test.beforeEach` follow the same rule: `await test.step('Setup N: ...')` wrapping the body.
 - Use `expect(page).toHaveURL()` for URL assertions after navigation (not `waitForURL`)
 - Conditional elements use `.isVisible().catch(() => false)` pattern
@@ -442,6 +457,7 @@ After verification passes (or after compilation completes when verification is s
 ```
 
 Status values:
+
 - `compiled` — spec written and verified passing
 - `compiled-env-pending` — spec written; verification skipped due to known environment issue (e.g. staging API outage); spec is structurally correct and expected to pass when environment recovers
 - `blocked` — cannot proceed; reason noted in the `## ⚠️ BLOCKED` section
@@ -472,6 +488,7 @@ Update these specs to use {utilityName}()? [yes / no / skip]
 ```
 
 **Response handling:**
+
 - **yes:** Update the spec — replace the inline sequence with a utility call and add the import. Re-run `npx playwright test {spec}.spec.ts` to confirm it still passes.
 - **no / skip:** Leave inline code as-is. Record the spec path in a `<!-- coverage-gap: {spec} | {utilityName} | {ISO date} -->` comment in INVENTORY.md so it is not re-proposed on the next compile.
 
@@ -480,6 +497,7 @@ If no matches are found, skip this step entirely with no output.
 ### 7. Report
 
 **On success:**
+
 ```
 COMPILED: {test name}
 Source:   tests/e2e/{area}/{test-name}.md
@@ -509,6 +527,7 @@ Specs with coverage gaps (inline code matches an inventory utility):
 (Utility extractions, propagation, and coverage gap sections omitted when empty)
 
 **On failure:**
+
 ```
 FAILED TO COMPILE: {test name}
 Source:   tests/e2e/{area}/{test-name}.md
@@ -577,23 +596,24 @@ For ambiguous matches (multiple elements), use `{ exact: true }`, `.nth()`, or s
 | Teardown without visibility guard | If the creation step failed, teardown will error trying to interact with a resource that doesn't exist. Always start with `if (!(await locator.isVisible().catch(() => false))) return;`. |
 | Importing from `@playwright/test` when using `registerTeardown` | `registerTeardown` is a custom fixture from `@fixtures` — it does not exist in `@playwright/test`. Change the import or the test will fail with "registerTeardown is not a function". |
 | Using `afterEach` instead of `registerTeardown` | `afterEach` does not fire on test timeout (hard time limit exceeded). `registerTeardown` (fixture teardown) does. Always use `registerTeardown` for resource cleanup. |
-| Module-level variable for resource name | `let projectName: string | undefined` declared outside `test()` and set inside is fragile when tests run in parallel. Declare the variable inside the test body and capture it in the `registerTeardown` closure. |
+| Module-level variable for resource name | `let projectName: string \| undefined` declared outside `test()` and set inside is fragile when tests run in parallel. Declare the variable inside the test body and capture it in the `registerTeardown` closure. |
 | Raw Playwright calls directly in the `test()` body | Every action must live inside an `await test.step('Step N: ...', async () => { ... })` block . Raw `await page.click(...)` at the test-body top level breaks the HTML reporter's step labeling. |
 | Setup steps written inline in the test body | Login, navigation to the starting state, and fixture expansion belong in `test.beforeEach` (each wrapped in `test.step('Setup N: ...')`). Inline setup in the `test()` body indicates the markdown was authored without a `## Before Hook` section — re-author or hand-fix the markdown, do not paper over by inlining. |
 | `test.afterEach` used for resource cleanup | `afterEach` does not fire on test timeout — created resources will leak. Use `registerTeardown` (LIFO, timeout-safe). Reserve `afterEach` for shared-fixture state restore. |
 | `registerTeardown` body NOT wrapped in `test.step` | The teardown still runs but appears as an unlabeled span in the HTML reporter, making post-mortem analysis harder. Always wrap: `registerTeardown(async () => { await test.step('Teardown: ...', async () => { ... }); })`. |
-
 
 ## Timeout strategy (retry-aware)
 
 This project uses a retry-aware timeout module at `playwright-tests/utils/timeouts.ts`. All non-trivial waits in compiled specs MUST go through it instead of hardcoded `timeout: N` values.
 
 **Tiers** — caps scale with `test.info().retry`:
+
 - Retry 0 (initial run): **2 min**
 - Retry 1: **3 min**
 - Retry 2+: **4 min**
 
 **Imports:**
+
 ```ts
 import { currentTimeout, smartWaitFor, smartScrollIntoView } from '../../../utils/timeouts';
 // (relative path varies by spec nesting — match the existing utils/* imports in the file)
@@ -610,6 +630,7 @@ import { currentTimeout, smartWaitFor, smartScrollIntoView } from '../../../util
 | Legitimately long wait (e.g. a slow server-side `Search for...`, 150s) | leave as-is | leave as-is, with a comment explaining why |
 
 **When NOT to use:**
+
 - A `.catch(() => {})` probe meant to detect optional UI — keep the short fixed cap.
 - The 3s tenant-selector probe in `loginWithCredentials`.
 - Very long, intentional waits (>2 min) for known-slow flows — keep explicit and comment why.
@@ -637,6 +658,7 @@ The compiler reads `INVENTORY.md` files from the target project repo. Format:
 Signatures use simplified format for readability (type annotations omitted in display). Declined extraction records are appended as HTML comments — matching on future runs is by **function name + target file path**.
 
 **Three utility file patterns used in this project:**
+
 - `utils/auth.ts` / `utils/*-helpers.ts` / `utils/*.ts` — action utilities and assertion helpers (`async function`)
 - `locators/*-locators.ts` — locator factory objects (`const fooLocators = { method: (page) => Locator }`), each with its own entry in `locators/INVENTORY.md`
 - Import paths from a spec at `journeys/{area}/foo.spec.ts`: use `../../utils/` for utilities, `../../locators/` for locators
@@ -684,6 +706,7 @@ Common Playwright errors during verification and how to fix them:
 ## Batch Compilation
 
 When compiling multiple test cases:
+
 1. Compile each test independently with its own guided replay session
 2. Report results as a summary table:
 
