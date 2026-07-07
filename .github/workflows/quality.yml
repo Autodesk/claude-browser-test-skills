@@ -13,7 +13,7 @@ jobs:
     name: Manifests, skill frontmatter, internal-reference guard
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -28,6 +28,6 @@ jobs:
     name: Markdown lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: markdownlint
         run: npx --yes markdownlint-cli2 "**/*.md" "#node_modules" "#CODE_OF_CONDUCT.md"
