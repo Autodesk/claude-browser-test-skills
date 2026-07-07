@@ -326,7 +326,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full contributor workflow, local 
 
 ## Contributing
 
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and our [Code of Conduct](CODE_OF_CONDUCT.md). External contributors are asked to sign Autodesk's Contributor License Agreement (the CLA Assistant bot will prompt you on your first pull request).
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and our [Code of Conduct](CODE_OF_CONDUCT.md). External contributors are asked to sign Autodesk's Contributor License Agreement before their contributions can be accepted — see [CONTRIBUTING.md](CONTRIBUTING.md#contributor-license-agreement-cla).
 
 ## Security
 

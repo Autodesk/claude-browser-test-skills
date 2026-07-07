@@ -6,12 +6,12 @@ Please also read [`CLAUDE.md`](CLAUDE.md) — it explains the repo layout and th
 
 ## Contributor License Agreement (CLA)
 
-External contributors (anyone who is **not** an Autodesk employee) must sign Autodesk's Contributor License Agreement before a contribution can be merged:
+Before we can accept code contributions from anyone who is **not** an Autodesk employee, you must sign Autodesk's Contributor License Agreement:
 
-- **Individuals** sign the individual CLA (ICLA).
-- **Contributing on behalf of a company** — your employer completes the corporate CLA (CCLA).
+- **Individual contributors** — sign [`AutodeskFormIndContribAgmtForOpenSource.pdf`](CLA/AutodeskFormIndContribAgmtForOpenSource.pdf).
+- **Contributing on behalf of a company** — have your employer sign [`AutodeskFormCorpContribAgmtForOpenSource.pdf`](CLA/AutodeskFormCorpContribAgmtForOpenSource.pdf).
 
-The **CLA Assistant bot** checks this automatically: on your first pull request it will comment with a link to sign, and the PR cannot be merged until the check passes. (This repo follows the same model as [Autodesk/maya-usd](https://github.com/Autodesk/maya-usd/blob/dev/doc/CONTRIBUTING.md).)
+Each form includes instructions on where to send the completed document. Once a signed CLA has been received, you'll be able to submit pull requests. (This mirrors the process used by other Autodesk open-source projects such as [maya-usd](https://github.com/Autodesk/maya-usd/blob/dev/doc/CONTRIBUTING.md).)
 
 ## Types of contributions
 
@@ -30,7 +30,7 @@ The **CLA Assistant bot** checks this automatically: on your first pull request 
 1. Fork the repo and create a branch off `main`.
 2. Make your change. The substance lives in `skills/*/SKILL.md`, the manifests under `.claude-plugin/`, and the docs. There is no build step — the deliverable is the skills and manifests themselves.
 3. Run the local checks (below) and, ideally, exercise the affected skill against a public demo app such as `https://www.saucedemo.com` (see the README → Getting Started).
-4. Open a pull request using the template. CI must pass, the CLA check must be green, and a code owner will review.
+4. Open a pull request using the template. CI must pass, your signed CLA must be on file (external contributors — see above), and a code owner will review.
 
 ## Local checks
 
