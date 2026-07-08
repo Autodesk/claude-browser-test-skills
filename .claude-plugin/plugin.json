@@ -1,0 +1,19 @@
+{
+  "name": "browser-test",
+  "version": "1.0.0",
+  "description": "E2E browser test pipeline for Claude Code: author, refine, compile, and run Playwright tests using browser automation",
+  "author": {
+    "name": "Brian Dueck"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/Autodesk/claude-browser-test-skills",
+  "repository": "https://github.com/Autodesk/claude-browser-test-skills",
+  "keywords": [
+    "e2e",
+    "testing",
+    "playwright",
+    "browser-automation",
+    "test-authoring",
+    "test-compilation"
+  ]
+}

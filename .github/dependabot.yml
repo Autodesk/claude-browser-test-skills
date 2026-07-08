@@ -1,0 +1,11 @@
+version: 2
+updates:
+  # Keep the GitHub Actions used by the CI workflow current (security + version).
+  # This repo has no application package manifests to track (the deliverable is
+  # skills + manifests); GitHub Actions is the relevant ecosystem.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci"
