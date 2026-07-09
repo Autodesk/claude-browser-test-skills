@@ -19,6 +19,78 @@ Author → Refiner → Compiler → Playwright CI
 | `browser-test:runner` | Executes a stable test case exactly as written using Claude and playwright-mcp, reports pass/fail with evidence. Requires LLM to run tests. |
 | `browser-test:compiler` | Converts a stable markdown test case into a Playwright `.spec.ts` file via guided browser replay. No LLM dependency to run tests.       |
 
+## Installation
+
+The skills ship as a Claude Code plugin. Install them from the marketplace defined in this repo.
+
+### From the marketplace (recommended)
+
+Inside a Claude Code session, add the marketplace and install the plugin:
+
+```
+/plugin marketplace add https://github.com/Autodesk/claude-browser-test-skills
+/plugin install browser-test@browser-test-skills
+```
+
+`browser-test` is the plugin name; `browser-test-skills` is the marketplace name (from `.claude-plugin/marketplace.json`). After installing, the four skills are available as `browser-test:author`, `browser-test:refiner`, `browser-test:compiler`, and `browser-test:runner`.
+
+### From a local checkout (development)
+
+To try the skills without publishing, add the local directory as a marketplace:
+
+```
+/plugin marketplace add /path/to/claude-browser-test-skills
+/plugin install browser-test@browser-test-skills
+```
+
+### Validate the plugin
+
+Before publishing changes, validate the manifest and skill frontmatter from the repo root:
+
+```bash
+claude plugin validate .
+```
+
+## Getting Started
+
+The fastest way to get comfortable with the skill pipeline is to try it on a public demo app before writing tests against your own product. This removes all environment friction — no credentials to set up, no conventions files to write, no dev server to run — so you can focus entirely on learning how the skills work together.
+
+### Try it on saucedemo.com
+
+[Saucedemo](https://www.saucedemo.com) is a purpose-built demo e-commerce site designed specifically for practising test automation. It has login, product listing, cart, and checkout flows that are realistic enough to be meaningful but simple enough to learn on. Login credentials are documented on the site's main page.
+
+**Step 1 — Explore manually first**
+
+Before invoking any skill, spend a few minutes on the site yourself. Log in, browse the products, add something to the cart, and complete a checkout. Pick one simple, end-to-end flow you'd like to turn into a test — for example, adding a specific item to the cart and checking out as a standard user.
+
+Doing this yourself first means you arrive at the authoring step with a clear mental model of the expected behaviour. The author skill will produce a much sharper test case when you can describe the flow precisely rather than asking it to discover one from scratch.
+
+**Step 2 — Author the test (directed)**
+
+Once you've chosen a flow, describe it directly:
+
+> "Write a test that verifies a standard user can add an item to the cart and complete checkout on <https://www.saucedemo.com>"
+
+**Step 3 — Run the full pipeline**
+
+```
+"Refine the saucedemo checkout test"     → browser-test:refiner
+"Compile the saucedemo checkout test"    → browser-test:compiler
+npx playwright test                      → runs the generated .spec.ts in CI
+```
+
+After one full pass on saucedemo you'll have the muscle memory for the workflow. Then move on to your real product — set up your project structure and conventions files as described in [Project Setup](#project-setup), and start authoring tests that reflect your team's actual domain knowledge.
+
+**Later — Exploratory authoring**
+
+Once you're comfortable with the pipeline, the author skill can also drive discovery. Ask it to explore the site and propose a full test plan:
+
+> "Do exploratory testing on <https://www.saucedemo.com>, discover what flows are present, and suggest a set of tests broken down by functional area."
+
+`browser-test:author` will navigate the site, identify distinct user flows, and return a prioritised list of test scenarios grouped by area — before writing a single test case. This is more time-intensive but surfaces coverage gaps you might not have thought to look for.
+
+---
+
 ## Why Test Automation Matters
 
 A reliable automated test suite is one of the highest-leverage investments a software team can make. It provides confidence that new changes haven't broken existing behaviour, enables faster release cycles, and catches regressions before users do. Without it, every deployment is a manual verification exercise and every refactor carries hidden risk.
@@ -70,46 +142,6 @@ The key insight: **the markdown test case is authoritative, and the `.spec.ts` i
 
 ---
 
-## Getting Started
-
-The fastest way to get comfortable with the skill pipeline is to try it on a public demo app before writing tests against your own product. This removes all environment friction — no credentials to set up, no conventions files to write, no dev server to run — so you can focus entirely on learning how the skills work together.
-
-### Try it on saucedemo.com
-
-[Saucedemo](https://www.saucedemo.com) is a purpose-built demo e-commerce site designed specifically for practising test automation. It has login, product listing, cart, and checkout flows that are realistic enough to be meaningful but simple enough to learn on. Login credentials are documented on the site's main page.
-
-**Step 1 — Explore manually first**
-
-Before invoking any skill, spend a few minutes on the site yourself. Log in, browse the products, add something to the cart, and complete a checkout. Pick one simple, end-to-end flow you'd like to turn into a test — for example, adding a specific item to the cart and checking out as a standard user.
-
-Doing this yourself first means you arrive at the authoring step with a clear mental model of the expected behaviour. The author skill will produce a much sharper test case when you can describe the flow precisely rather than asking it to discover one from scratch.
-
-**Step 2 — Author the test (directed)**
-
-Once you've chosen a flow, describe it directly:
-
-> "Write a test that verifies a standard user can add an item to the cart and complete checkout on <https://www.saucedemo.com>"
-
-**Step 3 — Run the full pipeline**
-
-```
-"Refine the saucedemo checkout test"     → browser-test:refiner
-"Compile the saucedemo checkout test"    → browser-test:compiler
-npx playwright test                      → runs the generated .spec.ts in CI
-```
-
-After one full pass on saucedemo you'll have the muscle memory for the workflow. Then move on to your real product — set up your project structure and conventions files as described in [Project Setup](#project-setup), and start authoring tests that reflect your team's actual domain knowledge.
-
-**Later — Exploratory authoring**
-
-Once you're comfortable with the pipeline, the author skill can also drive discovery. Ask it to explore the site and propose a full test plan:
-
-> "Do exploratory testing on <https://www.saucedemo.com>, discover what flows are present, and suggest a set of tests broken down by functional area."
-
-`browser-test:author` will navigate the site, identify distinct user flows, and return a prioritised list of test scenarios grouped by area — before writing a single test case. This is more time-intensive but surfaces coverage gaps you might not have thought to look for.
-
----
-
 ## Requirements
 
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI
@@ -144,38 +176,6 @@ You can revert to a faster, cheaper model (e.g. `claude-sonnet-5` or `claude-hai
     }
   }
   ```
-
-## Installation
-
-The skills ship as a Claude Code plugin. Install them from the marketplace defined in this repo.
-
-### From the marketplace (recommended)
-
-Inside a Claude Code session, add the marketplace and install the plugin:
-
-```
-/plugin marketplace add Autodesk/claude-browser-test-skills
-/plugin install browser-test@browser-test-skills
-```
-
-`browser-test` is the plugin name; `browser-test-skills` is the marketplace name (from `.claude-plugin/marketplace.json`). After installing, the four skills are available as `browser-test:author`, `browser-test:refiner`, `browser-test:compiler`, and `browser-test:runner`.
-
-### From a local checkout (development)
-
-To try the skills without publishing, add the local directory as a marketplace:
-
-```
-/plugin marketplace add /path/to/claude-browser-test-skills
-/plugin install browser-test@browser-test-skills
-```
-
-### Validate the plugin
-
-Before publishing changes, validate the manifest and skill frontmatter from the repo root:
-
-```bash
-claude plugin validate .
-```
 
 ## Project Setup
 
