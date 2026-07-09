@@ -1,6 +1,11 @@
 ## What & why
 
-Briefly describe the change and the motivation. Link any related issue (e.g. `Closes #123`).
+Briefly describe the change and the motivation.
+
+## Related issue
+
+<!-- Use a closing keyword (Closes/Fixes/Resolves) so the issue auto-closes when this PR merges to main. -->
+Closes #
 
 ## Type of change
 
@@ -11,6 +16,7 @@ Briefly describe the change and the motivation. Link any related issue (e.g. `Cl
 
 ## Checklist
 
+- [ ] Linked the issue this PR resolves with a closing keyword (`Closes #NNN`)
 - [ ] Local checks pass: `node scripts/ci/check-manifests.mjs`, `bash scripts/ci/check-skill-frontmatter.sh`, `bash scripts/ci/check-internal-refs.sh`
 - [ ] `claude plugin validate .` passes
 - [ ] No internal product names, credentials, or internal URLs introduced
