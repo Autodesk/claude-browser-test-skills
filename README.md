@@ -91,25 +91,19 @@ Once you're comfortable with the pipeline, the author skill can also drive disco
 
 ---
 
-## Why Test Automation Matters
+## The Gap This Closes
 
-A reliable automated test suite is one of the highest-leverage investments a software team can make. It provides confidence that new changes haven't broken existing behaviour, enables faster release cycles, and catches regressions before users do. Without it, every deployment is a manual verification exercise and every refactor carries hidden risk.
+The scarce, valuable knowledge in a test suite is **domain intent** — what the application is supposed to do, and which behaviours actually matter. Selector strings, `waitFor` timing, and session plumbing are just mechanics. Yet traditional automation forces that domain knowledge to be expressed in a technical language its owners don't speak, so the people who understand how the app should behave are rarely the ones who can encode it into a stable test.
 
-But building and maintaining that suite is hard — and the difficulty doesn't come from the testing logic itself. It comes from the mechanics: writing stable selectors, managing timing and async behaviour, keeping tests in sync as the UI evolves, and diagnosing failures that are half product bug and half test infrastructure. These are specialised skills that take time to develop.
+The result is a suite written by whoever happened to have both the time and the Playwright expertise — covering the flows that were easiest to automate rather than the ones that matter most, and maintained by people who often can't tell whether a red test means a real regression or just drifted plumbing.
 
-This creates a gap that most teams feel acutely: **the people with the deepest understanding of how the application is supposed to behave are rarely the same people who maintain the test suite.** Domain experts — product owners, senior developers, QA analysts who know every edge case — often can't act on that knowledge directly because the tooling requires automation expertise they don't have. Meanwhile, the engineers who could write the tests may not fully understand the business logic they're testing.
-
-The result is a test suite written by whoever had the time and the Playwright knowledge, covering the flows that were easiest to automate rather than the ones that matter most.
-
-**This project's goal is to close that gap.** By using an LLM to handle the automation mechanics, it lets domain experts describe what the application should do in plain language and get a working, stable test in return — without needing to know what an accessibility tree is or how to write a reliable `waitFor`.
+**This project closes that gap by keeping the two concerns separate.** The source of truth is a plain-language markdown test case: a domain expert describes what should happen, and the LLM handles the mechanics — finding selectors, stabilizing timing, generating runnable Playwright code. Domain knowledge stays where the humans are; the technical layer becomes a derived, disposable artifact. AI does the toil, but a person always authors the intent and owns the pass/fail judgement.
 
 ---
 
 ## How It Works (And Why It's Different)
 
-### The traditional automation problem
-
-In traditional E2E automation, tests are written by an engineer who reads the application's source code or uses browser DevTools to find CSS selectors, then hard-codes those selectors into a Playwright or Selenium script. The result works initially, but it's brittle: a class rename, a component restructure, or a UI refresh breaks the selectors even if the feature is completely unchanged. Keeping the test suite green becomes a maintenance burden that competes with feature work — and the people best placed to know whether the test is *right* are rarely the ones fixing it when it goes red.
+In traditional E2E automation, an engineer reads source code or uses DevTools to find CSS selectors, then hard-codes them into a Playwright or Selenium script. It works initially, but it's brittle: a class rename or component restructure breaks the selectors even when the feature is unchanged, and keeping the suite green becomes maintenance work that competes with shipping features.
 
 ### The LLM-driven approach
 
@@ -132,6 +126,10 @@ Author → Refiner → Compiler → Playwright CI
 
 The key insight: **the markdown test case is authoritative, and the `.spec.ts` is a derived artifact.** If a compiled test fails, you go back to the markdown — not the other way around.
 
+### Self-healing through refine → compile
+
+Because the `.spec.ts` is derived rather than hand-written, it can be regenerated. When the UI shifts and a compiled test drifts, you don't hunt through broken selectors — you **recompile**, and every selector is regenerated from a fresh accessibility snapshot of the current app. If the steps themselves have drifted, the refiner re-stabilizes the markdown first, then you recompile. The test heals against UI change automatically; the only thing a human does is confirm the domain *intent* still holds. This loop is exactly what the [When a Compiled Test Fails](#when-a-compiled-test-fails) decision tree walks through.
+
 ### Design principles
 
 - **Browser is the source of truth** — All selectors come from live `browser_snapshot` accessibility trees, never from reading application source code. This ensures every selector is tested against a real browser session before it's written down.
@@ -139,6 +137,21 @@ The key insight: **the markdown test case is authoritative, and the `.spec.ts` i
 - **Fresh session every run** — No session bleed between test runs. Each run starts from a clean browser state, which eliminates an entire class of intermittent failures caused by leftover cookies, cached state, or prior test side-effects.
 - **Conventions capture patterns** — Reusable patterns (login sequences, session management, common UI flows) live in conventions files, not in the LLM's implicit knowledge. This makes the test suite portable across sessions and models.
 - **Markdown is authoritative** — Test cases are human-readable markdown that any team member can review, question, and understand. Compiled `.spec.ts` files are generated output; the markdown is what you maintain.
+
+### Best practices, satisfied and extended
+
+E2E testing already has a well-understood set of best practices. This pipeline doesn't replace them — it satisfies each one by construction, then uses AI to push past the point where they usually break down, without removing the human from the loop.
+
+| Established best practice | How the pipeline satisfies it | How AI extends it — human stays in the loop |
+|---|---|---|
+| **Accessibility-first selectors** (roles/labels over CSS) | Every selector is captured from a live accessibility snapshot; `getByRole`/`getByLabel`/`getByTestId` are preferred over CSS | AI grounds selectors in what the user actually experiences on every run; the human never has to reverse-engineer them from source |
+| **Deterministic, flake-free tests** | The refiner runs the test repeatedly and fixes flaky steps until N consecutive passes before it reaches CI | AI diagnoses timing and loading-state flake automatically; the human decides when the behaviour is *correct*, not just green |
+| **Test isolation** | Every run starts from a fresh browser session — no cookie, cache, or state bleed between tests | AI enforces isolation by default, eliminating a whole class of intermittent failures no one has to debug |
+| **Resilience to UI change** | Selectors are sourced from live snapshots, never hard-coded from source code | Refine → compile **self-heals** the test against UI drift by regenerating selectors; the human only confirms the intent still holds |
+| **A maintainable single source of truth** | The authoritative test is plain-language markdown any stakeholder can read, review, and question | AI translates domain intent into working automation, so authorship belongs to the person with the knowledge — not whoever knows Playwright |
+| **Reusable patterns (DRY)** | Login sequences, session handling, and common flows live in conventions files, not copy-pasted into each test | The refiner discovers and promotes repeated patterns into conventions as it stabilizes tests; the human curates what becomes shared |
+
+The through-line: **AI owns the mechanics, the human owns the intent and the judgement.** Because the source of truth is natural language rather than code, that ownership is real rather than nominal — a domain expert can read a test, disagree with it, and change what it asserts without ever touching a selector. The automation adapts to the app; the human decides what "correct" means.
 
 ---
 
